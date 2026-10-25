@@ -45,7 +45,7 @@ output:
   - platform: ledc
     pin: 
       number: GPIO2
-      inverted: true  # Wbudowane diody w ESP32 często zapalają się przy stanie LOW
+      inverted: false  # Wbudowane diody w ESP32 często zapalają się przy stanie LOW
       ignore_strapping_warning: true
     id: onboard_led
 
@@ -58,7 +58,7 @@ binary_sensor:
     id: gas_pulse_input
     name: "Stan Kontraktonu Gazu"
     # Ta sekcja reaguje natychmiast na każde fizyczne zwarcie styku licznika
-    on_press:
+    on_release:
       then:
         - output.turn_on: onboard_led
         - delay: 500ms
@@ -67,19 +67,19 @@ binary_sensor:
 sensor:
   # Czujniki temperatury
   - platform: dallas_temp
-    address: 0xAAAA
+    address: 0x523c25f649de7f28
     name: "Temperatura CWU"
     id: temp_CWU
     icon: "mdi:water-thermometer"
 
   - platform: dallas_temp
-    address: 0xbbbb
+    address: 0x873c34f6495a9f28
     name: "Temperatura wyjście"
     id: temp_output
     icon: "mdi:thermometer-chevron-up"
     
   - platform: dallas_temp
-    address: 0xccccc
+    address: 0x33000000368c9128
     name: "Temperatura powrót"
     id: temp_input
     icon: "mdi:thermometer-chevron-down"
