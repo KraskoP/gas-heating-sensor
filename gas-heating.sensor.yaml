@@ -1,8 +1,12 @@
 # Board: Generic ESP32 Board (Generic)
+substitutions: 
+  name: "gas-heating-sensor"
+  friendlyname: "Gas sensor"
+
 
 esphome:
-  name: gas-heating-sensor
-  friendly_name: gas-heating-sensor
+  name: ${name}
+  friendly_name: ${friendlyname}
 
 esp32:
   variant: esp32
@@ -21,6 +25,7 @@ ota:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  reboot_timeout: 5min  
   ap:
     ssid: gas-heating
     password: "Ov9R4LQKpiKC"
@@ -63,7 +68,12 @@ binary_sensor:
         - output.turn_on: onboard_led
         - delay: 500ms
         - output.turn_off: onboard_led
-    
+
+  - platform: status
+    name: ${friendlyname} Status
+    entity_category: diagnostic
+
+          
 sensor:
   # Czujniki temperatury
   - platform: dallas_temp
@@ -83,3 +93,54 @@ sensor:
     name: "Temperatura powrót"
     id: temp_input
     icon: "mdi:thermometer-chevron-down"
+
+  - platform: wifi_signal
+    name: ${friendlyname} WiFi Signal
+    id: wifi_signal_db
+    update_interval: 120s
+    entity_category: diagnostic
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    accuracy_decimals: 0
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+
+  - platform: uptime
+    name: ${friendlyname} Uptime
+    filters:
+      - lambda: return x / 3600;
+    unit_of_measurement: "h"
+    entity_category: diagnostic    
+
+text_sensor:
+  - platform: version
+    name: ${friendlyname} Version
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+    mac_address:
+      name: MAC Address
+    ssid:
+      name: WIFI SSID
+    bssid:
+      name: bssid
+
+
+button:
+  - platform: safe_mode
+    name: "${friendlyname} Restart (Safe Mode)"
+    entity_category: diagnostic
+
+
+  - platform: restart
+    name: "${friendlyname} Restart"
+    entity_category: diagnostic
